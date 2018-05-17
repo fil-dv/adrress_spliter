@@ -67,7 +67,36 @@ namespace Adr
             {
                 string query = File.ReadAllText("ImportSplitedAdr.sql", Encoding.Default);
                 SplitAndExecSubQueries(query);
+                CheckResult();
+            }            
+        }
+
+        private void CheckResult()
+        {            
+            Mediator.ApYes = GetCount("select count(*) from import_clnt_example t where t.comment33 = 1");            
+            Mediator.ApNo = GetCount("select count(*) from import_clnt_example t where t.comment33 = 0");
+            Mediator.AfYes = GetCount("select count(*) from import_clnt_example t where t.comment34 = 1");
+            Mediator.AfNo = GetCount("select count(*) from import_clnt_example t where t.comment34 = 0");
+            Mediator.AwYes = GetCount("select count(*) from import_clnt_example t where t.comment35 = 1");
+            Mediator.AwNo = GetCount("select count(*) from import_clnt_example t where t.comment35 = 0");
+            Mediator.AvrYes = GetCount("select count(*) from import_clnt_example t where t.comment36 = 1");
+            Mediator.AvrNo = GetCount("select count(*) from import_clnt_example t where t.comment36 = 0");
+            
+            FormRes form = new FormRes();
+            form.ShowDialog();
+            this.Close();
+        }
+
+        private int GetCount(string query)
+        {
+            OracleDataReader reader = _con.GetReader(query);
+            int i = -1;
+            while (reader.Read())
+            {
+                i = Convert.ToInt32(reader[0]);
             }
+            reader.Close();
+            return i;
         }
 
         void InitData()

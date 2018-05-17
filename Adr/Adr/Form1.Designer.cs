@@ -42,6 +42,8 @@
             // 
             // listBox_adr
             // 
+            this.listBox_adr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listBox_adr.FormattingEnabled = true;
             this.listBox_adr.HorizontalScrollbar = true;
             this.listBox_adr.Location = new System.Drawing.Point(15, 75);
@@ -100,6 +102,7 @@
             // 
             // button_start
             // 
+            this.button_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_start.Location = new System.Drawing.Point(535, 21);
             this.button_start.Name = "button_start";
             this.button_start.Size = new System.Drawing.Size(87, 23);
@@ -118,6 +121,7 @@
             // 
             // button_path
             // 
+            this.button_path.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_path.Location = new System.Drawing.Point(405, 21);
             this.button_path.Name = "button_path";
             this.button_path.Size = new System.Drawing.Size(92, 23);
@@ -140,6 +144,7 @@
             this.Controls.Add(this.numericUpDown_threads);
             this.Controls.Add(this.listBox_adr);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Адреса";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_threads)).EndInit();

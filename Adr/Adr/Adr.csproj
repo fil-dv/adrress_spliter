@@ -59,12 +59,22 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormRes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRes.Designer.cs">
+      <DependentUpon>FormRes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Mediator.cs" />
     <Compile Include="MySettings\MySettings.cs" />
     <Compile Include="Pair.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormRes.resx">
+      <DependentUpon>FormRes.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
