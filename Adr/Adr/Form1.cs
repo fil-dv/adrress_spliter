@@ -38,37 +38,49 @@ namespace Adr
 
         private void Form1_Finished(int i)
         {
-            File.Copy("convert1.csv", "convert.csv", true);
-            //MessageBox.Show("Finished " + i);
-            ImportSplitedAdr();
-            if (InvokeRequired)
-            {
-                Action action = () =>
-                {
-                    button_start.Enabled = false;
-                };
-                Invoke(action);
-            }
-            else
-            {
-                button_start.Enabled = false;
-            }
-        }
-
-        private void ImportSplitedAdr()
-        {
             _threadCounter++;
             if (_threadCounter == Convert.ToInt32(numericUpDown_threads.Value))
             {
+                //File.AppendAllText("convert.csv", _resultText, Encoding.Default);
+                FilesProcessing();
                 File.Copy("convert.csv", _pathToDir + "\\convert.csv", true);
-                StartBatFile("IMPORT.BAT");                
+                StartBatFile("IMPORT.BAT");
             }
             if (_threadCounter == (Convert.ToInt32(numericUpDown_threads.Value) + 1))
             {
                 string query = File.ReadAllText("ImportSplitedAdr.sql", Encoding.Default);
                 SplitAndExecSubQueries(query);
                 CheckResult();
-            }            
+            }
+            //ImportSplitedAdr();
+            //if (InvokeRequired)
+            //{
+            //    Action action = () =>
+            //    {
+            //        button_start.Enabled = false;
+            //    };
+            //    Invoke(action);
+            //}
+            //else
+            //{
+            //    button_start.Enabled = false;
+            //}
+        }
+
+        private void FilesProcessing()
+        {
+             string[] arr = Directory.GetFiles(Environment.CurrentDirectory, "convert*");
+            foreach (var item in arr)
+            {
+                if (item.Contains("convert.csv"))
+                {
+                    continue;
+                }
+                else
+                {
+                    File.AppendAllText("convert.csv", File.ReadAllText(item, Encoding.Default) + Environment.NewLine);
+                }
+            }
         }
 
         private void CheckResult()
@@ -114,7 +126,7 @@ namespace Adr
                 _list.Add(str);
             }
             reader.Close();
-            Cleaner();
+            Cleaner();            
             FillData();            
         }
 
@@ -200,6 +212,8 @@ namespace Adr
         private void button_start_Click(object sender, EventArgs e)
         {
             GetPathToDir();
+            File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
+            FileCleaning();
             switch (numericUpDown_threads.Value)
             {
                 case 2:
@@ -217,23 +231,54 @@ namespace Adr
             }
         }
 
+        private void FileCleaning()
+        {
+            string[] arrAdr = Directory.GetFiles(Environment.CurrentDirectory, "adr*.csv");
+            string[] arrConvert = Directory.GetFiles(Environment.CurrentDirectory, "convert*.csv");
+            foreach (var item in arrAdr)
+            {
+                File.WriteAllText(item, "");
+            }
+            foreach (var item in arrConvert)
+            {
+                File.WriteAllText(item, "");
+            }
+        }
+
         private void One()
         {
-            File.WriteAllLines("adr.csv", _list, Encoding.Default);
+            WriteToFile(_list, "1");                        
+        }
+
+        private void WriteToFile(List<string> list, string str)
+        {
+            File.WriteAllLines("adr" + str + ".csv", list, Encoding.Default);
             if (_pathToDir.Length < 1)
             {
                 MessageBox.Show("Необходимо указать путь к папке реестра.");
             }
             else
             {
-                File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
-                StartBatFile("Split_work.bat");
-            }            
+                StartBatFile("Split_work" + str + ".bat");
+            }
         }
 
         private void Two()
         {
-            
+            int firstCount = _list.Count / 2;
+            int secondCount = _list.Count - firstCount;
+            List<string> listOne = new List<string>();
+            List<string> listTwo = new List<string>();
+            for (int i = 0; i < firstCount; i++)
+            {
+                listOne.Add(_list[i]);
+            }
+            for (int i = firstCount; i < _list.Count ; i++)
+            {
+                listTwo.Add(_list[i]);
+            }
+            WriteToFile(listOne, "1");
+            WriteToFile(listTwo, "2");
         }
 
         private void Three()
