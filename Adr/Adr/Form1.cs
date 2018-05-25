@@ -31,7 +31,7 @@ namespace Adr
         string _pathToDir = "";
         int _threadCounter = 0;
 
-        private void Subscribe()
+        void Subscribe()
         {
             Finished += Form1_Finished;
         }
@@ -41,7 +41,6 @@ namespace Adr
             _threadCounter++;
             if (_threadCounter == Convert.ToInt32(numericUpDown_threads.Value))
             {
-                //File.AppendAllText("convert.csv", _resultText, Encoding.Default);
                 FilesProcessing();
                 File.Copy("convert.csv", _pathToDir + "\\convert.csv", true);
                 StartBatFile("IMPORT.BAT");
@@ -69,7 +68,7 @@ namespace Adr
 
         private void FilesProcessing()
         {
-             string[] arr = Directory.GetFiles(Environment.CurrentDirectory, "convert*");
+            string[] arr = Directory.GetFiles(Environment.CurrentDirectory, "convert*");
             foreach (var item in arr)
             {
                 if (item.Contains("convert.csv"))
@@ -78,7 +77,7 @@ namespace Adr
                 }
                 else
                 {
-                    File.AppendAllText("convert.csv", File.ReadAllText(item, Encoding.Default) + Environment.NewLine);
+                    File.AppendAllText("convert.csv", (File.ReadAllText(item, Encoding.Default) + Environment.NewLine), Encoding.Default);                    
                 }
             }
         }
@@ -96,7 +95,18 @@ namespace Adr
             
             FormRes form = new FormRes();
             form.ShowDialog();
-            this.Close();
+            if (InvokeRequired)
+            {
+                Action action = () =>
+                {
+                    this.Close();
+                };
+                Invoke(action);
+            }
+            else
+            {
+                this.Close();
+            }            
         }
 
         private int GetCount(string query)
@@ -127,7 +137,16 @@ namespace Adr
             }
             reader.Close();
             Cleaner();            
-            FillData();            
+            FillData();
+            SetThreadCount();
+        }
+
+        private void SetThreadCount()
+        {
+            if (_list.Count <= 100) numericUpDown_threads.Value = 1;
+            else if(_list.Count > 100 && _list.Count <= 300) numericUpDown_threads.Value = 2;
+            else if (_list.Count > 300 && _list.Count <= 500) numericUpDown_threads.Value = 3;
+            else numericUpDown_threads.Value = 4;
         }
 
         private void SplitAndExecSubQueries(string query)
@@ -183,7 +202,6 @@ namespace Adr
         
         void StartBatFile(string fileName)
         {
-            //CleanResFiles();
             Process proc = new Process();
             proc.Exited += new EventHandler(FinishHandler);
             proc.StartInfo.CreateNoWindow = true;
@@ -192,7 +210,7 @@ namespace Adr
             proc.Start();
         }
 
-        private void CleanResFiles()
+        void CleanResFiles()
         {
             string[] arr = Directory.GetFiles(Environment.CurrentDirectory, "convert*");
             foreach (var item in arr)
@@ -279,21 +297,89 @@ namespace Adr
             }
             WriteToFile(listOne, "1");
             WriteToFile(listTwo, "2");
+            toolStripStatusLabel1.Text = String.Format("Первый поток - {0}, второй поток - {1}.", firstCount, secondCount);
         }
 
         private void Three()
         {
-            throw new NotImplementedException();
+            int firstCount = _list.Count / 3;
+            List<string> listOne = new List<string>();
+            List<string> listTwo = new List<string>();
+            List<string> listThree = new List<string>();
+            for (int i = 0; i < firstCount; i++)
+            {
+                listOne.Add(_list[i]);
+            }
+            for (int i = firstCount; i < firstCount * 2; i++)
+            {
+                listTwo.Add(_list[i]);
+            }
+            for (int i = firstCount * 2; i < _list.Count; i++)
+            {
+                listThree.Add(_list[i]);
+            }
+            WriteToFile(listOne, "1");
+            WriteToFile(listTwo, "2");
+            WriteToFile(listThree, "3");
         }
+
 
         private void Four()
         {
-            throw new NotImplementedException();
+            int firstCount = _list.Count / 4;
+            List<string> listOne = new List<string>();
+            List<string> listTwo = new List<string>();
+            List<string> listThree = new List<string>();
+            List<string> listFore = new List<string>();
+            for (int i = 0; i < firstCount; i++)
+            {
+                listOne.Add(_list[i]);
+            }
+            for (int i = firstCount; i < firstCount * 2; i++)
+            {
+                listTwo.Add(_list[i]);
+            }
+            for (int i = firstCount * 2; i < firstCount * 3; i++)
+            {
+                listThree.Add(_list[i]);
+            }
+            for (int i = firstCount * 3; i < _list.Count; i++)
+            {
+                listFore.Add(_list[i]);
+            }
+            WriteToFile(listOne, "1");
+            WriteToFile(listTwo, "2");
+            WriteToFile(listThree, "3");
+            WriteToFile(listFore, "4");
         }
 
         private void button_path_Click(object sender, EventArgs e)
         {
             GetPathToDir();
+        }
+
+        private void numericUpDown_threads_ValueChanged(object sender, EventArgs e)
+        {
+            int firstCount = _list.Count / Convert.ToInt32(numericUpDown_threads.Value);
+            int lastCount = -1;
+            switch (numericUpDown_threads.Value)
+            {
+                case 2:
+                    lastCount = _list.Count - firstCount;
+                    toolStripStatusLabel1.Text = String.Format("Первый поток - {0}, второй поток - {1}.", firstCount, lastCount);
+                    break;
+                case 3:
+                    lastCount = _list.Count - (firstCount * 2);
+                    toolStripStatusLabel1.Text = String.Format("Первый поток - {0}, второй поток - {0}, третий поток - {1}.", firstCount, (_list.Count - (firstCount * 2)));
+                    break;
+                case 4:
+                    lastCount = _list.Count - (firstCount * 3);
+                    toolStripStatusLabel1.Text = String.Format("Первый поток - {0}, второй поток - {0}, третий поток - {0}, четвертый поток - {1}.", firstCount, (_list.Count - (firstCount * 3)));
+                    break;
+                default:
+                    toolStripStatusLabel1.Text = String.Format("Один поток - {0}.", _list.Count);
+                    break;
+            }
         }
     }
 }
