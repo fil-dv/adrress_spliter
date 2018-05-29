@@ -66,6 +66,7 @@
     <Compile Include="FormRes.Designer.cs">
       <DependentUpon>FormRes.cs</DependentUpon>
     </Compile>
+    <Compile Include="Loger.cs" />
     <Compile Include="Mediator.cs" />
     <Compile Include="MySettings\MySettings.cs" />
     <Compile Include="Pair.cs" />
