@@ -49,6 +49,7 @@ namespace Adr
                 }
                 if (_threadCounter == (Convert.ToInt32(numericUpDown_threads.Value) + 1))
                 {
+                    Loger.AddRecordToLog("Начата проверка результатов разбивки.");
                     string query = File.ReadAllText(@"sql\ImportSplitedAdr.sql", Encoding.Default);
                     SplitAndExecSubQueries(query);
                     CheckResult();
@@ -92,7 +93,7 @@ namespace Adr
         private void CheckResult()
         {
             try
-            {
+            {                
                 Mediator.ApYes = GetCount("select count(*) from import_clnt_example t where t.comment33 = 1");
                 Mediator.ApNo = GetCount("select count(*) from import_clnt_example t where t.comment33 = 0");
                 Mediator.AfYes = GetCount("select count(*) from import_clnt_example t where t.comment34 = 1");
@@ -168,34 +169,27 @@ namespace Adr
             }
             catch (Exception ex)
             {
-                InsertStartDataToLog(ex.Message);
+                Loger.AddRecordToLog(ex.Message);
             }            
         }
 
-        private void InsertStartDataToLog(string message = "")
+        private void InsertStartDataToLog()
         {
-            Loger.AddRecordToLog("----------------- " + Environment.UserName + " ------------------");
-            Loger.AddRecordToLog("Начинаем разбивку адресов.");
-            if (message.Length > 0)
-            {                
-                Loger.AddRecordToLog(message);
-            }
-            else
+            try
             {
-                try
+                Loger.AddRecordToLog(Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
+                Loger.AddRecordToLog("Начинаем разбивку адресов.");
+                string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
+                OracleDataReader reader = _con.GetReader(query);
+                while (reader.Read())
                 {
-                    string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
-                    OracleDataReader reader = _con.GetReader(query);
-                    while (reader.Read())
-                    {
-                        Loger.AddRecordToLog("Контрагент :" + reader[0].ToString() + ", " + "реестр: " + reader[1].ToString());
-                    }
-                    reader.Close();
+                    Loger.AddRecordToLog("Контрагент :" + reader[0].ToString() + ", " + "реестр: " + reader[1].ToString());
                 }
-                catch (Exception ex)
-                {
-                    Loger.AddRecordToLog(ex.Message);
-                }                
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                Loger.AddRecordToLog(ex.Message);
             }
         }
 
@@ -327,7 +321,7 @@ namespace Adr
                 GetPathToDir();
                 File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
                 FileCleaning();
-                Loger.AddRecordToLog("Количество потоков: " + numericUpDown_threads.Value + ".");
+                Loger.AddRecordToLog("Разбивка начата, количество потоков: " + numericUpDown_threads.Value + ".");
                 switch (numericUpDown_threads.Value)
                 {
                     case 2:
