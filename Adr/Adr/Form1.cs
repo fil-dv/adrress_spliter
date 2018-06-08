@@ -164,8 +164,7 @@ namespace Adr
                 Cleaner();
                 FillData();
                 SetThreadCount();
-                SetNumericUpDownValue();
-                InsertStartDataToLog();
+                SetNumericUpDownValue();                
             }
             catch (Exception ex)
             {
@@ -178,7 +177,7 @@ namespace Adr
             try
             {
                 Loger.AddRecordToLog(Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
-                Loger.AddRecordToLog("Начинаем разбивку адресов.");
+                Loger.AddRecordToLog("Начинаем разбивку, количество потоков: " + numericUpDown_threads.Value + ".");
                 string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
                 OracleDataReader reader = _con.GetReader(query);
                 while (reader.Read())
@@ -260,6 +259,7 @@ namespace Adr
                     _list[i] = _list[i].Replace(", , ,", ",");
                     _list[i] = _list[i].Replace(", ,", ",");
                     _list[i] = _list[i].Replace("РД", "");
+                    _list[i] = _list[i].Replace("РД", ""); 
                     _list[i] = _list[i].Replace("SR", "");
                     _list[i] = _list[i].Replace(" нас.пункт", "");
                     _list[i] = _list[i].Replace("відсутні", "");
@@ -318,10 +318,10 @@ namespace Adr
         {
             try
             {
+                InsertStartDataToLog();
                 GetPathToDir();
                 File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
                 FileCleaning();
-                Loger.AddRecordToLog("Разбивка начата, количество потоков: " + numericUpDown_threads.Value + ".");
                 switch (numericUpDown_threads.Value)
                 {
                     case 2:
