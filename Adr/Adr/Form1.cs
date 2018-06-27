@@ -49,9 +49,11 @@ namespace Adr
                 }
                 if (_threadCounter == (Convert.ToInt32(numericUpDown_threads.Value) + 1))
                 {
-                    Loger.AddRecordToLog("Начата проверка результатов разбивки.");
+                    Loger.AddRecordToLog("Запускаем ImportSplitedAdr.");
                     string query = File.ReadAllText(@"sql\ImportSplitedAdr.sql", Encoding.Default);
                     SplitAndExecSubQueries(query);
+
+                    Loger.AddRecordToLog("ImportSplitedAdr отработал, запускаем проверку результатов разбивки.");
                     CheckResult();
                 }
                 //ImportSplitedAdr();
@@ -94,14 +96,14 @@ namespace Adr
         {
             try
             {                
-                Mediator.ApYes = GetCount("select count(*) from import_clnt_example t where t.comment33 = 1");
-                Mediator.ApNo = GetCount("select count(*) from import_clnt_example t where t.comment33 = 0");
-                Mediator.AfYes = GetCount("select count(*) from import_clnt_example t where t.comment34 = 1");
-                Mediator.AfNo = GetCount("select count(*) from import_clnt_example t where t.comment34 = 0");
-                Mediator.AwYes = GetCount("select count(*) from import_clnt_example t where t.comment35 = 1");
-                Mediator.AwNo = GetCount("select count(*) from import_clnt_example t where t.comment35 = 0");
-                Mediator.AvrYes = GetCount("select count(*) from import_clnt_example t where t.comment36 = 1");
-                Mediator.AvrNo = GetCount("select count(*) from import_clnt_example t where t.comment36 = 0");
+                Mediator.ApYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment33 = 1 and t.c_p_index is not null");
+                Mediator.ApNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment33 = 0 and t.c_p_index is not null");
+                Mediator.AfYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment34 = 1 and t.c_f_index is not null");
+                Mediator.AfNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment34 = 0 and t.c_f_index is not null");
+                Mediator.AwYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment35 = 1 and t.c_w_index is not null");
+                Mediator.AwNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment35 = 0 and t.c_w_index is not null");
+                Mediator.AvrYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 1 and t.c_r_index is not null");
+                Mediator.AvrNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 0 and t.c_r_index is not null");
 
                 FormRes form = new FormRes();
                 form.ShowDialog();
@@ -176,7 +178,7 @@ namespace Adr
         {
             try
             {
-                Loger.AddRecordToLog(Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
+                Loger.AddRecordToLog(Environment.NewLine + Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
                 Loger.AddRecordToLog("Начинаем разбивку, количество потоков: " + numericUpDown_threads.Value + ".");
                 string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
                 OracleDataReader reader = _con.GetReader(query);
@@ -265,6 +267,8 @@ namespace Adr
                     _list[i] = _list[i].Replace("відсутні", "");
                     _list[i] = _list[i].Replace("гр./с.", "");
                     _list[i] = _list[i].Replace("п.код", "");
+                    if(!_list[i].Contains("область"))
+                        _list[i] = _list[i].Replace("област", "");
                 }
             }
             catch (Exception ex)
