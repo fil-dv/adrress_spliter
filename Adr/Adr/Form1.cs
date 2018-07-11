@@ -50,25 +50,13 @@ namespace Adr
                 if (_threadCounter == (Convert.ToInt32(numericUpDown_threads.Value) + 1))
                 {
                     Loger.AddRecordToLog("Запускаем ImportSplitedAdr.");
+                    this.Text = "Идет обновление данных в базе...";
                     string query = File.ReadAllText(@"sql\ImportSplitedAdr.sql", Encoding.Default);
                     SplitAndExecSubQueries(query);
-
                     Loger.AddRecordToLog("ImportSplitedAdr отработал, запускаем проверку результатов разбивки.");
-                    CheckResult();
+                    this.Text = "Идет проверка результатов разбивки...";
+                    CheckResult();                   
                 }
-                //ImportSplitedAdr();
-                //if (InvokeRequired)
-                //{
-                //    Action action = () =>
-                //    {
-                //        button_start.Enabled = false;
-                //    };
-                //    Invoke(action);
-                //}
-                //else
-                //{
-                //    button_start.Enabled = false;
-                //}
             }
             catch (Exception ex)
             {
@@ -104,7 +92,7 @@ namespace Adr
                 Mediator.AwNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment35 = 0 and t.c_w_index is not null");
                 Mediator.AvrYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 1 and t.c_r_index is not null");
                 Mediator.AvrNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 0 and t.c_r_index is not null");
-
+                this.Text = "Готово";
                 FormRes form = new FormRes();
                 form.ShowDialog();
                 if (InvokeRequired)
