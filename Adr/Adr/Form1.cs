@@ -313,7 +313,9 @@ namespace Adr
             try
             {
                 Action act = new Action(InsertStartDataToLog);
-                act.Invoke();
+                if (InvokeRequired)  act.Invoke();
+                else act.Invoke();
+                
                 GetPathToDir();
                 File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
                 FileCleaning();
