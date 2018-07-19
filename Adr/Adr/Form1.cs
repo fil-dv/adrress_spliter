@@ -167,7 +167,7 @@ namespace Adr
             try
             {
                 Loger.AddRecordToLog(Environment.NewLine + Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
-                Loger.AddRecordToLog("Начинаем разбивку, количество потоков: " + numericUpDown_threads.Value + ".");
+                Loger.AddRecordToLog("Начинаем разбивку. Всего адресов: " + _list.Count + ", количество потоков: " + numericUpDown_threads.Value + ".");
                 string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
                 OracleDataReader reader = _con.GetReader(query);
                 while (reader.Read())
@@ -181,6 +181,8 @@ namespace Adr
                 Loger.AddRecordToLog(ex.Message);
             }
         }
+
+
 
         private void SetThreadCount()
         {
@@ -310,7 +312,8 @@ namespace Adr
         {
             try
             {
-                InsertStartDataToLog();
+                Action act = new Action(InsertStartDataToLog);
+                act.Invoke();
                 GetPathToDir();
                 File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
                 FileCleaning();
