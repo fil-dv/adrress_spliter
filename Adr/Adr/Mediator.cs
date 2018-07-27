@@ -7,6 +7,8 @@ namespace Adr
 {
     public static class Mediator
     {
+        public static bool IsIncomParam { get; set; }  // программа запускается со входящим параметром или без
+
         public  static int ApYes { get; set; }
         public  static int ApNo { get; set; }
         public  static int AfYes { get; set; }

@@ -13,6 +13,7 @@ using System.IO;
 using Oracle.ManagedDataAccess.Client;
 using System.Diagnostics;
 using System.Threading;
+using System.Reflection;
 
 namespace Adr
 {
@@ -21,8 +22,22 @@ namespace Adr
         public Form1()
         {
             InitializeComponent();
+            CheckIncomingParams();
             Subscribe();
             InitData();
+        }
+
+        private void CheckIncomingParams()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1 && args[1] != null)
+            {
+                Mediator.IsIncomParam = true;
+            }
+            else
+            {
+                Mediator.IsIncomParam = false;
+            }
         }
 
         OracleConnect _con;
@@ -93,20 +108,17 @@ namespace Adr
                 Mediator.AvrYes = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 1 and t.c_r_index is not null");
                 Mediator.AvrNo = GetCount("select count(t.unique_id) from import_clnt_example t where t.comment36 = 0 and t.c_r_index is not null");
                 this.Text = "Готово";
-                FormRes form = new FormRes();
-                form.ShowDialog();
-                if (InvokeRequired)
+
+                Loger.AddRecordToLog((Mediator.ApYes + Mediator.AfYes + Mediator.AwYes + Mediator.AvrYes).ToString() + " шт. успешно.");
+                Loger.AddRecordToLog((Mediator.ApNo + Mediator.AfNo + Mediator.AwNo + Mediator.AvrNo).ToString() + " шт. не рассплитилось.");
+
+                if (!Mediator.IsIncomParam)
                 {
-                    Action action = () =>
-                    {
-                        this.Close();
-                    };
-                    Invoke(action);
+                    FormRes form = new FormRes();
+                    form.ShowDialog();
                 }
-                else
-                {
-                    this.Close();
-                }
+
+                this.Close();
             }
             catch (Exception ex)
             {
@@ -140,9 +152,12 @@ namespace Adr
             {                
                 _con = new OracleConnect("User ID=IMPORT_USER;password=sT7hk9Lm;Data Source=CD_WORK");
                 _con.OpenConnect();
+
                 string query = File.ReadAllText(@"sql\CleanDubles.sql", Encoding.Default);
+                
                 SplitAndExecSubQueries(query);
                 query = File.ReadAllText(@"sql\AddrToSplit.sql", Encoding.Default);
+                Loger.AddRecordToLog(query);
                 OracleDataReader reader = _con.GetReader(query);
                 _list = new List<string>();
                 while (reader.Read())
@@ -154,7 +169,14 @@ namespace Adr
                 Cleaner();
                 FillData();
                 SetThreadCount();
-                SetNumericUpDownValue();                
+                SetNumericUpDownValue();
+                if (Mediator.IsIncomParam)
+                {
+                    button_path.Enabled = false;
+                    button_start.Enabled = false;
+                    numericUpDown_threads.Enabled = false;
+                    StartSplit();
+                }
             }
             catch (Exception ex)
             {
@@ -168,6 +190,9 @@ namespace Adr
             {
                 Loger.AddRecordToLog(Environment.NewLine + Environment.NewLine + "----------------- " + Environment.UserName + " ------------------");
                 Loger.AddRecordToLog("Начинаем разбивку. Всего адресов: " + _list.Count + ", количество потоков: " + numericUpDown_threads.Value + ".");
+
+                Console.WriteLine("Начинаем разбивку. Всего адресов: " + _list.Count + ", количество потоков: " + numericUpDown_threads.Value + ".");
+
                 string query = File.ReadAllText(@"sql\GetContrAndReg.sql", Encoding.Default);
                 OracleDataReader reader = _con.GetReader(query);
                 while (reader.Read())
@@ -308,15 +333,25 @@ namespace Adr
             }
         }
 
-        private void button_start_Click(object sender, EventArgs e)
+        void StartSplit()
         {
             try
             {
-                Action act = new Action(InsertStartDataToLog);
-                if (InvokeRequired)  act.Invoke();
-                else act.Invoke();
-                
-                GetPathToDir();
+                InsertStartDataToLog();
+                //Action act = new Action(InsertStartDataToLog);
+                //if (InvokeRequired)  act.Invoke();
+                //else act.Invoke();
+
+                if (Mediator.IsIncomParam)
+                {
+                    string[] args = Environment.GetCommandLineArgs();
+                    if (args.Length > 1 && args[1] != null)
+                    {
+                        _pathToDir = args[1];
+                    }
+                }
+
+
                 File.WriteAllLines(_pathToDir + "\\adr.csv", _list, Encoding.Default);
                 FileCleaning();
                 switch (numericUpDown_threads.Value)
@@ -335,6 +370,21 @@ namespace Adr
                         break;
                 }
                 Loger.AddRecordToLog("Разбивка закончена.");
+                Console.WriteLine(DateTime.Now + "Разбивка закончена.");
+            }
+            catch (Exception ex)
+            {
+
+                Loger.AddRecordToLog(ex.Message); 
+            }
+        }
+
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                GetPathToDir();
+                StartSplit();
             }
             catch (Exception ex)
             {

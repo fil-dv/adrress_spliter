@@ -23,8 +23,6 @@ namespace Adr
             {
                 label_total_yes.Text = (Mediator.ApYes + Mediator.AfYes + Mediator.AwYes + Mediator.AvrYes).ToString();
                 label_total_no.Text = (Mediator.ApNo + Mediator.AfNo + Mediator.AwNo + Mediator.AvrNo).ToString();
-                Loger.AddRecordToLog((Mediator.ApYes + Mediator.AfYes + Mediator.AwYes + Mediator.AvrYes).ToString() + " шт. успешно.");
-                Loger.AddRecordToLog((Mediator.ApNo + Mediator.AfNo + Mediator.AwNo + Mediator.AvrNo).ToString() + " шт. не рассплитилось.");
 
                 label_ap_yes.Text = Mediator.ApYes.ToString();
                 label_ap_no.Text = Mediator.ApNo.ToString();
@@ -37,6 +35,11 @@ namespace Adr
 
                 label_avr_yes.Text = Mediator.AvrYes.ToString();
                 label_avr_no.Text = Mediator.AvrNo.ToString();
+
+                if (Mediator.IsIncomParam)
+                {
+                    this.Close();
+                }
             }
             catch (Exception ex)
             {
