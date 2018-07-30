@@ -157,7 +157,6 @@ namespace Adr
                 
                 SplitAndExecSubQueries(query);
                 query = File.ReadAllText(@"sql\AddrToSplit.sql", Encoding.Default);
-                Loger.AddRecordToLog(query);
                 OracleDataReader reader = _con.GetReader(query);
                 _list = new List<string>();
                 while (reader.Read())
@@ -175,6 +174,7 @@ namespace Adr
                     button_path.Enabled = false;
                     button_start.Enabled = false;
                     numericUpDown_threads.Enabled = false;
+                    SetThreadCount();
                     StartSplit();
                 }
             }
